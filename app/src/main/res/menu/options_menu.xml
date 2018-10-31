@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/my_account"
+        android:title="My Account"
+        android:icon="@drawable/ic_iconmonstr_info_6"
+        android:onClick="showAccountDetails"
+        app:showAsAction="always"
+        />
+    <item
+        android:id="@+id/my_contacts"
+        android:title="My Friends"
+        android:icon="@drawable/ic_iconmonstr_user_30"
+        android:onClick="displayFriendsScreen"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/dev_mode"
+        android:title="Developer Mode"
+        android:checked="false"
+        android:checkable="true"
+        app:showAsAction="never"
+        android:onClick="toggleDevMode" />
+
+    <item
+        android:id="@+id/logout"
+        android:title="Sign Out"
+        app:showAsAction="never"
+        android:onClick="signOut" />
+</menu>
