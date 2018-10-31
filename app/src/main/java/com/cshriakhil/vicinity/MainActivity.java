@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final int FLAG_USER_BLOCKED = -1;
 
     private GoogleMap mMap;
-    Location mLastLocation;
+    LatLng mUserLatLng;
     LatLng mTargetLatLng;
     Marker mCurrMarker;
     Marker mTargetMarker;
@@ -158,14 +158,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.i(TAG, "onResume: reached");
         // TODO check if crashing due to the async
         /* Possible States:
-        *   Start   End
-        *   false   false   => First time after opening activity => Show dialog (true)
-        *   true    false   => The previous request failed => Show dialog (true)
-        *   false   true    => State should not be possible to reach => Don't care
-        *   true    true    => The previous request succeeded => Don't show dialog (false)
-        *
-        *   Suitable conditions: start NAND end; equivalent to !start OR !end
-        * */
+         *   Start   End
+         *   false   false   => First time after opening activity => Show dialog (true)
+         *   true    false   => The previous request failed => Show dialog (true)
+         *   false   true    => State should not be possible to reach => Don't care
+         *   true    true    => The previous request succeeded => Don't show dialog (false)
+         *
+         *   Suitable conditions: start NAND end; equivalent to !start OR !end
+         * */
         if (!locationRequestStarted || !locationRequestCompleted) {
             // onResume is called after onCreate, where the permission checks take place.
             // however, onRequestPermissionsResult seems to return asynchronously
@@ -291,21 +291,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mCurrMarker = mMap.addMarker(markerOptions);
 
         //move map camera only at start
-        if (mLastLocation == null) {
+        if (mUserLatLng == null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(updatedLatLng));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15.5f));
         }
 
         // update the value of the last known location
-        mLastLocation = newLoc;
+        mUserLatLng = updatedLatLng;
     }
 
     // OnClick method for "Find nearby Friends" button
     public void findNearby(View v) {
-        // mLastLocation is null iff GPS is disabled/super slow. By this point, permissions should have already been granted
-        if (mLastLocation != null) {
+        // mUserLatLng is null iff GPS is disabled/super slow. By this point, permissions should have already been granted
+        if (mUserLatLng != null) {
             // clear all markers when executing new request
             mMap.clear();
+
+            if (mTargetLatLng == null) {
+                // if the user hasn't selected a location, use current location
+                mTargetLatLng = mUserLatLng;
+            }
+
             // re-add the target markers and circle
             addTargetMarker(mTargetLatLng);
             addTargetCircle(mTargetLatLng);
@@ -325,11 +331,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         .addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                                LocData userLocData = dataSnapshot.getValue(LocData.class);
-                                                Log.i(TAG, "mLocRef/onDataChange: Adding " + userLocData.name);
+                                                LocData friendLocData = dataSnapshot.getValue(LocData.class);
                                                 if (Haversine.distance(mTargetLatLng.latitude, mTargetLatLng.longitude,
-                                                        userLocData.latitude,userLocData.longitude) <= SEARCH_RADIUS) {
-                                                    addFriendMarker(userLocData);
+                                                        friendLocData.latitude, friendLocData.longitude) <= SEARCH_RADIUS) {
+                                                    Log.i(TAG, "mLocRef/onDataChange: Adding " + friendLocData.name);
+                                                    addFriendMarker(friendLocData);
                                                 }
                                             }
 
@@ -379,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mTargetMarker = mMap.addMarker(markerOptions);
     }
 
-    public void addTargetCircle (LatLng latLng) {
+    public void addTargetCircle(LatLng latLng) {
         // clear circle if exists
         if (mTargetCircle != null) {
             mTargetCircle.remove();
@@ -476,7 +482,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        startActivity(new Intent(MainActivity.this,LoginActivity.class));
+                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
                         finish();
                     }
                 });
