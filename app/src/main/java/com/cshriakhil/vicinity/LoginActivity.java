@@ -1,8 +1,8 @@
 package com.cshriakhil.vicinity;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
@@ -39,7 +39,7 @@ public class LoginActivity extends AppCompatActivity {
                             new AuthUI.IdpConfig.GoogleBuilder().build()
                     ))
                     .build();
-            startActivityForResult(i,RC_SIGN_IN);
+            startActivityForResult(i, RC_SIGN_IN);
         }
     }
 
@@ -63,12 +63,12 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+                if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
                     Toast.makeText(this, "No network connection", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
                     Toast.makeText(this, "Unkown Error encountered", Toast.LENGTH_SHORT).show();
                     return;
                 }

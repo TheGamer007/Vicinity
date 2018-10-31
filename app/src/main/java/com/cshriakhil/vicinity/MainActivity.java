@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final int LOCATION_REQUEST_INTERVAL = 5 * 1000;
     private final int LOCATION_REQUEST_FASTEST_INTERVAL = 2 * 1000;
 
-    private final double search_radius = 0.5; // in km
+    private final double SEARCH_RADIUS = 0.5; // in km
 
     private final String KEY_USER_LOCATION = "locations";
     private final String KEY_USER_FRIENDS = "friends";
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     Location mLastLocation;
     LatLng mTargetLatLng;
-//    Marker mCurrMarker;
+    Marker mCurrMarker;
     Marker mTargetMarker;
     Circle mTargetCircle;
     TextView mLatitudeDisplay, mLongitudeDisplay, mIdDisplay;
@@ -265,10 +265,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     protected void handleLocationUpdate(Location newLoc) {
         Log.i(TAG, "handleLocationUpdate: reached");
+
         // Remove current marker if exists, so that markers don't stack up
-//        if (mCurrMarker != null) {
-//            mCurrMarker.remove();
-//        }
+        if (mCurrMarker != null) {
+            mCurrMarker.remove();
+        }
 
         // Get new location details
         double updatedLatitude = newLoc.getLatitude();
@@ -280,14 +281,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Send update request to server
         updateUserLocation(updatedLatitude, updatedLongitude);
 
-//        // Build current location marker
-//        MarkerOptions markerOptions = new MarkerOptions();
-//        markerOptions.position(updatedLatLng);
-//        markerOptions.title("Current Position");
-//        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
+        // Build current location marker
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(updatedLatLng);
+        markerOptions.title("Current Position");
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET));
 
         //Place current location marker
-//        mCurrMarker = mMap.addMarker(markerOptions);
+        mCurrMarker = mMap.addMarker(markerOptions);
 
         //move map camera only at start
         if (mLastLocation == null) {
@@ -327,7 +328,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                 LocData userLocData = dataSnapshot.getValue(LocData.class);
                                                 Log.i(TAG, "mLocRef/onDataChange: Adding " + userLocData.name);
                                                 if (Haversine.distance(mTargetLatLng.latitude, mTargetLatLng.longitude,
-                                                        userLocData.latitude,userLocData.longitude) <= search_radius) {
+                                                        userLocData.latitude,userLocData.longitude) <= SEARCH_RADIUS) {
                                                     addFriendMarker(userLocData);
                                                 }
                                             }
@@ -387,7 +388,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // add circle to show search range
         CircleOptions circleOptions = new CircleOptions();
         circleOptions.center(mTargetLatLng);
-        circleOptions.radius(search_radius * 1000); // in meters
+        circleOptions.radius(SEARCH_RADIUS * 1000); // convert to meters
         circleOptions.strokeColor(0xFF00E5FF);
         circleOptions.fillColor(0x3018FFFF);
         circleOptions.strokeWidth(2); // in pixels
